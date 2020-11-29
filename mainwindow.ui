@@ -14,14 +14,20 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
    <widget class="GLWidget" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>40</y>
-      <width>461</width>
-      <height>461</height>
+      <x>10</x>
+      <y>10</y>
+      <width>521</width>
+      <height>531</height>
      </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
@@ -30,8 +36,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>470</y>
+      <x>550</x>
+      <y>510</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -44,7 +50,7 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>420</y>
+      <y>470</y>
       <width>151</width>
       <height>31</height>
      </rect>

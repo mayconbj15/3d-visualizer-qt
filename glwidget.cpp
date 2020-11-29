@@ -462,6 +462,8 @@ void GLWidget::destroyShaders()
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
+    printf("keyPresss");
+    printf("key %d", event->key());
     switch(event ->key())
     {
     case Qt:: Key_0:
