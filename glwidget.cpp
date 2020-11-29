@@ -20,6 +20,8 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent)
     currentShader = 0;
 
     zoom = 0.0;
+
+//    fpsCounter = 0;
 }
 
 GLWidget::~GLWidget()
@@ -29,29 +31,27 @@ GLWidget::~GLWidget()
 }
 
 void GLWidget::initializeGL(){
-    glEnable(GL_DEPTH_TEST);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glEnable(GL_DEPTH_TEST);
 
-    //QImage texColor= QImage(":/ textures/bricksDiffuse.png");
-    //QImage texNormal= QImage(":/ textures/bricksNormal.png");
+    QImage texColor= QImage(":/textures/bricksDiffuse.png");
+    QImage texNormal= QImage(":/textures/bricksNormal.png");
 
+    glFuncs.glActiveTexture(GL_TEXTURE0);
+    texID [0] = bindTexture(texColor);
+    glFuncs.glActiveTexture(GL_TEXTURE1);
+    texID [1] = bindTexture(texNormal);
 
-    //QGLFunctions qOpenGLFunctions = QGLFunctions();
-
-    //glActiveTexture(GL_TEXTURE0);
-    //texID [0] = bindTexture(texColor, GL_TEXTURE_2D, GL_RGBA);
-    //glActiveTexture(GL_TEXTURE1);
-    //texID [1] = bindTexture(texNormal);
 
     connect (&timer ,SIGNAL(timeout ()), this ,SLOT(animate ()));
     timer.start (0);
 }
 
 void GLWidget::resizeGL(int width, int height){
-    glViewport(0, 0, width , height);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glViewport(0, 0, width , height);
     projectionMatrix.setToIdentity ();
-    projectionMatrix.perspective (60.0 ,
-    static_cast <qreal >( width) /
-    static_cast <qreal >( height), 0.1, 20.0);
+    projectionMatrix.perspective (60.0 , static_cast <qreal >( width) / static_cast <qreal >( height), 0.1, 20.0);
 
     trackBall.resizeViewport(width , height);
 
@@ -59,7 +59,8 @@ void GLWidget::resizeGL(int width, int height){
 }
 
 void GLWidget::paintGL(){
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (!vboVertices)
         return;
@@ -98,11 +99,11 @@ void GLWidget::paintGL(){
     shaderProgram ->setUniformValue("texColorMap", 0);
     shaderProgram ->setUniformValue("texNormalMap", 1);
 
-    //QOpenGLFunctions qOpenGLFunctions = QOpenGLFunctions();
-    //qOpenGLFunctions.glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D , texID [0]);
-    //qOpenGLFunctions.glActiveTexture(GL_TEXTURE1);
-    //glBindTexture(GL_TEXTURE_2D , texID [1]);
+    glFuncs.glActiveTexture(GL_TEXTURE0);
+    glFuncs.glBindTexture(GL_TEXTURE_2D , texID [0]);
+    glFuncs.glActiveTexture(GL_TEXTURE1);
+    glFuncs.glBindTexture(GL_TEXTURE_2D , texID [1]);
+
 
     vboVertices ->bind();
     shaderProgram ->enableAttributeArray("vPosition");
@@ -118,7 +119,7 @@ void GLWidget::paintGL(){
     shaderProgram ->setAttributeBuffer("vTangent", GL_FLOAT ,0, 4, 0);
     vboIndices ->bind ();
 
-    glDrawElements(GL_TRIANGLES , numFaces * 3, GL_UNSIGNED_INT , 0);
+    glFuncs.glDrawElements(GL_TRIANGLES , numFaces * 3, GL_UNSIGNED_INT , 0);
 
     vboIndices ->release ();
     vboTangents ->release ();
@@ -134,10 +135,11 @@ void GLWidget::animate(){
 
 void GLWidget::toggleBackgroundColor(bool toBlack){
     printf("TOOGLEE");
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     if(toBlack)
-        glClearColor(0,0,0,1);
+        glFuncs.glClearColor(0,0,0,1);
     else
-        glClearColor(1,1,1,1);
+        glFuncs.glClearColor(1,1,1,1);
 
     updateGL();
 }
@@ -181,7 +183,7 @@ void GLWidget::readOFFFile(const QString &fileName){
     stream >> numVertices >> numFaces >> line;
 
     delete [] vertices;
-    vertices = new QVector4D[numVertices ];
+    vertices = new QVector4D[numVertices];
 
     delete [] indices;
     indices = new unsigned int[numFaces * 3];
@@ -337,15 +339,17 @@ void GLWidget::createVBOs()
     vboVertices ->create();
     vboVertices ->bind();
     vboVertices ->setUsagePattern(QGLBuffer::StaticDraw);
-    vboVertices ->allocate( vertices , numVertices *
-    sizeof (QVector4D));
+    vboVertices ->allocate( vertices , numVertices * sizeof (QVector4D));
+
     delete [] vertices;
     vertices = NULL;
+
     vboNormals = new QGLBuffer(QGLBuffer::VertexBuffer);
     vboNormals ->create();
     vboNormals ->bind();
     vboNormals ->setUsagePattern(QGLBuffer::StaticDraw);
     vboNormals ->allocate(normals , numVertices * sizeof (QVector3D));
+
     delete [] normals;
     normals = NULL;
 
@@ -354,13 +358,16 @@ void GLWidget::createVBOs()
     vboTexCoords ->bind();
     vboTexCoords ->setUsagePattern(QGLBuffer::StaticDraw);
     vboTexCoords -> allocate( texCoords , numVertices * sizeof (QVector2D));
+
     delete [] texCoords;
     texCoords = NULL;
+
     vboTangents = new QGLBuffer(QGLBuffer::VertexBuffer);
     vboTangents ->create();
     vboTangents ->bind();
     vboTangents ->setUsagePattern(QGLBuffer::StaticDraw);
     vboTangents ->allocate( tangents , numVertices * sizeof (QVector4D));
+
     delete [] tangents;
     tangents = NULL;
 
@@ -369,6 +376,7 @@ void GLWidget::createVBOs()
     vboIndices ->bind();
     vboIndices ->setUsagePattern(QGLBuffer::StaticDraw);
     vboIndices ->allocate(indices , numFaces * 3 * sizeof ( unsigned int ));
+
     delete [] indices;
     indices = NULL;
 }
@@ -435,7 +443,7 @@ void GLWidget::createShaders()
     shaderProgram ->addShader(fragmentShader);
 
     if (!shaderProgram ->link())
-        qWarning() << shaderProgram ->log() << endl;
+        qWarning() << shaderProgram ->log() << Qt::endl;
 }
 
 void GLWidget::destroyShaders()
@@ -501,4 +509,18 @@ void GLWidget :: mouseReleaseEvent(QMouseEvent *event)
 void GLWidget :: wheelEvent(QWheelEvent *event)
 {
     zoom += 0.001 * event ->delta();
+}
+
+void GLWidget::takeScreenshot()
+{
+    QImage screenshot = grabFrameBuffer();
+    QString fileName;
+    fileName = QFileDialog::getSaveFileName(this, "Save File As", QDir:: homePath(), QString("PNG Files (*.png)"));
+    if (fileName.length()) {
+        if (!fileName.contains(".png") )
+            fileName += ".png";
+        if (screenshot. save(fileName , "PNG")) {
+            QMessageBox::information(this , "Screenshot", "Screenshot taken!", QMessageBox::Ok);
+        }
+    }
 }

@@ -1,10 +1,12 @@
 attribute vec4 vPosition;
 attribute vec3 vNormal;
 attribute vec2 vTexCoord;
+
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
 uniform vec4 lightPosition;
+
 varying vec3 fN;
 varying vec3 fE;
 varying vec3 fL;

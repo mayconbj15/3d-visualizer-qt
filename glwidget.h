@@ -1,15 +1,14 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
-#define GL_GLEXT_PROTOTYPES
 
+
+#include <QOpenGLFunctions>
 #include <QtOpenGL>
-//#include <QOpenGLFunctions>
-//#include <QtOpenGL/QGLFunctions>
-#include <GL/gl.h>
+#include <QGLWidget >
 
-#include <iostream>
-#include <fstream>
-#include <limits>
+#include<iostream>
+#include<fstream>
+#include<limits>
 
 #include "camera.h"
 #include "light.h"
@@ -22,21 +21,26 @@ class GLWidget : public QGLWidget
 public:
     explicit GLWidget(QWidget *parent = nullptr);
     virtual ~GLWidget();
+    void takeScreenshot();
+
+signals:
+    void statusBarMessage(QString ns);
 
 public slots:
     void toggleBackgroundColor(bool toBlack);
     void showFileOpenDialog();
     void animate();
 
-protected:
+protected :
     void initializeGL();
-    void resizeGL(int width, int height);
+    void resizeGL(int width , int height);
     void paintGL();
-    void keyPressEvent(QKeyEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
+    void keyPressEvent(QKeyEvent *event);
+
 
 private:
     void readOFFFile( const QString &fileName);
@@ -45,9 +49,10 @@ private:
     void genTangents();
     void createVBOs();
     void destroyVBOs();
-
     void createShaders();
     void destroyShaders();
+
+    QPointF pixelPosToViewPos(const QPointF &p);
 
     unsigned int numVertices;
     unsigned int numFaces;
@@ -82,9 +87,6 @@ private:
     double zoom;
 
     QTimer timer;
-
-signals:
-    void statusBarMessage(QString ns);
 };
 
 #endif // GLWIDGET_H

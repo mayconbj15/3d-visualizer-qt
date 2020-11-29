@@ -20,9 +20,12 @@ void main()
     vec3 B = normalMatrix * bitangent;
     vec3 N = normalMatrix * vNormal;
     mat3 TBN = mat3(T.x, B.x, N.x,T.y, B.y, N.y,T.z, B.z, N.z);
+
     vec4 eyePosition = modelViewMatrix * vPosition;
     fL = TBN * (lightPosition.xyz - eyePosition.xyz);
     fE = TBN * (-eyePosition.xyz);
+
     fTexCoord = vTexCoord;
+
     gl_Position = projectionMatrix * eyePosition;
 }
