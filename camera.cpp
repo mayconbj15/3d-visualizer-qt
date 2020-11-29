@@ -1,3 +1,9 @@
+/*
+ * Classe responsável pela instância da câmera na cena
+ *
+ *
+ */
+
 #include "camera.h"
 
 Camera::Camera()

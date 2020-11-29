@@ -1,5 +1,16 @@
+/*
+ * Classe principal do programa responsável pela renderização dos objetos, texturas e o tratamento de eventos
+ *
+ *
+ */
+
 #include "glwidget.h"
 
+/**
+ * @brief GLWidget::GLWidget
+ *
+ * Construtor
+ */
 GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent)
 {
     vertices = NULL;
@@ -24,12 +35,22 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent)
 //    fpsCounter = 0;
 }
 
+/**
+ * @brief GLWidget::~GLWidget
+ *
+ * Destrutor
+ */
 GLWidget::~GLWidget()
 {
     destroyVBOs();
     destroyShaders();
 }
 
+/**
+ * @brief GLWidget::initializeGL
+ *
+ *  Função que inicializa um tela do OpenGL e carrega as texturas
+ */
 void GLWidget::initializeGL(){
     QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     glFuncs.glEnable(GL_DEPTH_TEST);
@@ -47,6 +68,11 @@ void GLWidget::initializeGL(){
     timer.start (0);
 }
 
+/**
+ * @brief GLWidget::resizeGL
+ *
+ *  Função responsável por redimensionar uma janela OpenGL
+ */
 void GLWidget::resizeGL(int width, int height){
     QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     glFuncs.glViewport(0, 0, width , height);
@@ -58,6 +84,11 @@ void GLWidget::resizeGL(int width, int height){
     updateGL();
 }
 
+/**
+ * @brief GLWidget::paintGL
+ *
+ *   Função responsável por carregar as configurações de renderização de uma janela OpenGL
+ */
 void GLWidget::paintGL(){
     QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     glFuncs.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -129,10 +160,21 @@ void GLWidget::paintGL(){
     shaderProgram ->release ();
 }
 
+/**
+ * @brief GLWidget::animate
+ *
+ *  Função responsável por renderizar uma janela OpenGL
+ */
 void GLWidget::animate(){
     updateGL();
 }
 
+/**
+ * @brief GLWidget::toggleBackgroundColor
+ *
+ *  Função responsável por receber um evento e trocar a cor de
+ *  fundo de uma janela OpenGL
+ */
 void GLWidget::toggleBackgroundColor(bool toBlack){
     printf("TOOGLEE");
     QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
@@ -144,6 +186,12 @@ void GLWidget::toggleBackgroundColor(bool toBlack){
     updateGL();
 }
 
+/**
+ * @brief GLWidget::showFileOpenDialog
+ *
+ *  Função responsável por ler um arquivo .off e criar o objeto
+ *  de acordo com o que foi lido
+ */
 void GLWidget::showFileOpenDialog (){
     printf("OPEN OFF FILE");
     QByteArray fileFormat = "off";
@@ -168,6 +216,11 @@ void GLWidget::showFileOpenDialog (){
     }
 }
 
+/**
+ * @brief GLWidget::readOFFFile
+ *
+ *  Função responsável por ler um arquivo .off
+ */
 void GLWidget::readOFFFile(const QString &fileName){
     std:: ifstream stream;
     stream.open(fileName.toLatin1(), std:: ifstream ::in);
@@ -230,6 +283,12 @@ void GLWidget::readOFFFile(const QString &fileName){
         .arg(numFaces));
 }
 
+/**
+ * @brief GLWidget::genNormals
+ *
+ *  Função responsável por estimar as normais nos
+ * vértices da malha e as armazena na matriz
+ */
 void GLWidget::genNormals(){
     delete [] normals;
     normals = new QVector3D[numVertices ];
@@ -251,6 +310,12 @@ void GLWidget::genNormals(){
         normals[i]. normalize ();
 }
 
+/**
+ * @brief GLWidget::genTexCoordsCylinder
+ *
+ *   Função responsável por gerar coordenadas
+ *  de textura cilíndricas para os vértices da malha
+ */
 void GLWidget::genTexCoordsCylinder(){
     delete [] texCoords;
     texCoords = new QVector2D[numVertices ];
@@ -275,6 +340,12 @@ void GLWidget::genTexCoordsCylinder(){
     }
 }
 
+/**
+ * @brief GLWidget::genTangents
+ *
+ *  Função responsável por estimar os vetores tangentes
+ * por vértice exigidos pelo Mapeamento Normal
+ */
 void GLWidget::genTangents ()
 {
     delete [] tangents;
@@ -331,6 +402,13 @@ void GLWidget::genTangents ()
     delete [] bitangents;
 }
 
+/**
+ * @brief GLWidget::createVBOs
+ *
+ *  Função responsável por criar os Vertex Buffer Objects
+ * que permitem a manipulação direta dos dados armazenados
+ * no lado do servidor.
+ */
 void GLWidget::createVBOs()
 {
     destroyVBOs();
@@ -381,6 +459,11 @@ void GLWidget::createVBOs()
     indices = NULL;
 }
 
+/**
+ * @brief GLWidget::destroyVBOs
+ *
+ *  Função responsável por destruir os Vertex Buffer Objects
+ */
 void GLWidget::destroyVBOs()
 {
     if (vboVertices) {
@@ -414,6 +497,11 @@ void GLWidget::destroyVBOs()
     }
 }
 
+/**
+ * @brief GLWidget::createShaders
+ *
+ *  Função responsável por carregar os shaders que serão trocados no programa
+ */
 void GLWidget::createShaders()
 {
     destroyShaders();
@@ -446,6 +534,11 @@ void GLWidget::createShaders()
         qWarning() << shaderProgram ->log() << Qt::endl;
 }
 
+/**
+ * @brief GLWidget::destroyShaders
+ *
+ *  Função responsável por destruir os Shaders carregados
+ */
 void GLWidget::destroyShaders()
 {
     delete vertexShader;
@@ -460,6 +553,12 @@ void GLWidget::destroyShaders()
     }
 }
 
+/**
+ * @brief GLWidget::keyPressEvent
+ *
+ *  Função responsável por tratar eventos em
+ *  que alguma tecla do teclado é pressionada
+ */
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     printf("keyPresss");
@@ -491,28 +590,53 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
+/**
+ * @brief GLWidget::mouseMoveEvent
+ *
+ *  Função responsável por tratar evento de movimentação do mouse
+ */
 void GLWidget :: mouseMoveEvent(QMouseEvent *event)
 {
     trackBall.mouseMove(event -> pos());
 }
 
+/**
+ * @brief GLWidget::mousePressEvent
+ *
+ *  Função responsável por tratar evento quando o botão do mouse é clicado
+ */
 void GLWidget :: mousePressEvent(QMouseEvent *event)
 {
     if (event ->button () & Qt:: LeftButton)
         trackBall.mousePress(event -> pos());
 }
 
+/**
+ * @brief GLWidget::mouseReleaseEvent
+ *
+ *  Função responsável por tratar evento quando o botão do mouse é solto
+ */
 void GLWidget :: mouseReleaseEvent(QMouseEvent *event)
 {
     if (event ->button () == Qt:: LeftButton)
         trackBall.mouseRelease(event -> pos());
 }
 
+/**
+ * @brief GLWidget::wheelEvent
+ *
+ *  Função responsável por tratar evento quando a bolinha do mouse é acionada
+ */
 void GLWidget :: wheelEvent(QWheelEvent *event)
 {
     zoom += 0.001 * event ->delta();
 }
 
+/**
+ * @brief GLWidget::takeScreenshot
+ *
+ *  Função responsável por realizar uma captura da tela
+ */
 void GLWidget::takeScreenshot()
 {
     QImage screenshot = grabFrameBuffer();
